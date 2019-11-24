@@ -28,45 +28,58 @@ router.post('/register', (req, res) => {
             msg: 'Password do not match!'
         });
     }
-    User.findOne({ username: username }).then(user => {
-        if (user) {
-            res.status(400).json({
-                msg: 'Username is already taken.'
-            });
-        }
-    })
-    User.findOne({ email: email }).then(user => {
-        if (user) {
-            res.status(400).json({
-                msg: 'Email is already taken.'
-            });
-        }
-    });
-    let newUser = new User({
-        name: name,
-        username: username,
-        address: address,
-        email: email,
-        password: password,
-        userType: userType
-    })
-
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) {
-                throw err;
+    else {
+        User.findOne({ username: username }).then(user => {
+            if (user) {
+                return res.status(400).json({
+                    msg: 'Username is already taken.'
+                });
             } else {
-                newUser.password = hash;
-                newUser.save().then(user => {
-                    res.status(200).json({
-                        success: true,
-                        msg: 'You are now registered!'
-                    })
-                })
+                User.findOne({ email: email }).then(user => {
+                    if (user) {
+                        return res.status(400).json({
+                            msg: 'Email is already taken.'
+                        });
+                    } else{
+                        let newUser = new User({
+                            name: name,
+                            username: username,
+                            address: address,
+                            email: email,
+                            password: password,
+                            userType: userType
+                        })
+                    
+                        bcrypt.genSalt(10, (err, salt) => {
+                            bcrypt.hash(newUser.password, salt, (err, hash) => {
+                                if (err) {
+                                    throw err;
+                                } else {
+                                    newUser.password = hash;
+                                    newUser.save().then(user => {
+                                        res.status(200).json({
+                                            success: true,
+                                            msg: 'You are now registered!'
+                                        })
+                                    })
+                                }
+                            })
+                    
+                        })
+                    }
+                    
+                    
+                });
+
+
+            
+                
             }
         })
-
-    })
+    }
+    
+    
+    
 });
 
 router.post('/login', (req, res) => {
